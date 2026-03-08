@@ -524,6 +524,98 @@
       border: 1px solid rgba(91, 122, 255, 0.1);
     }
 
+    .projects-subtitle {
+      margin: 26px 0 14px;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    .github-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .github-stat {
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 12px;
+    }
+
+    .github-stat-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .github-stat-value {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .project-highlights {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .highlight-card {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .highlight-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .highlight-name {
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .highlight-focus {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
+    .highlight-text {
+      color: var(--text-mid);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .highlight-links {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      display: flex;
+      gap: 10px;
+      color: var(--text-dim);
+    }
+
     .projects-loading {
       grid-column: 1 / -1;
       text-align: center;
@@ -681,6 +773,14 @@
       .projects-list {
         grid-template-columns: 1fr;
       }
+
+      .project-highlights {
+        grid-template-columns: 1fr;
+      }
+
+      .github-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 500px) {
@@ -699,6 +799,10 @@
 
       .project-body {
         padding: 16px 18px;
+      }
+
+      .github-stats {
+        grid-template-columns: 1fr;
       }
 
       .footer-inner {
@@ -962,6 +1066,16 @@
     <section class="projects" id="projects" aria-label="Open source projects by Christian Luppi">
       <div class="wrap">
         <p class="section-label">Projects</p>
+        <div class="github-stats" id="github-stats">
+          <div class="github-stat"><span class="github-stat-label">Public Repos</span><span class="github-stat-value">--</span></div>
+          <div class="github-stat"><span class="github-stat-label">Followers</span><span class="github-stat-value">--</span></div>
+          <div class="github-stat"><span class="github-stat-label">Total Stars</span><span class="github-stat-value">--</span></div>
+          <div class="github-stat"><span class="github-stat-label">Top Language</span><span class="github-stat-value">--</span></div>
+        </div>
+        <div class="project-highlights" id="project-highlights">
+          <p class="projects-loading">Loading</p>
+        </div>
+        <p class="projects-subtitle">All repositories</p>
         <div class="projects-list" id="projects-grid">
           <p class="projects-loading">Loading</p>
         </div>
@@ -1014,6 +1128,28 @@
     const USERNAME = "luppichristian";
     const HIDDEN = new Set([USERNAME, `${USERNAME}.github.io`]);
     const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
+    const FEATURED_PROJECTS = [
+      {
+        repo: "GameTest",
+        focus: "Testing",
+        details: "Record/replay framework for C/C++ game loops. Designed to validate gameplay determinism and catch regressions without rebuilding your engine architecture."
+      },
+      {
+        repo: "libmath2",
+        focus: "Math",
+        details: "2D/3D math primitives with vectors, matrices, and easing/noise helpers. Built to stay lightweight and practical for rendering and gameplay code."
+      },
+      {
+        repo: "xccmeta",
+        focus: "Build tools",
+        details: "Static C/C++ parser used in preprocessing and build-time metadata generation. Useful for reflection-style workflows with zero runtime cost."
+      },
+      {
+        repo: "nshader",
+        focus: "Graphics",
+        details: "Portable shader packaging format based on SDL3 shadercross output, helping keep shader assets consistent across graphics backends."
+      }
+    ];
 
     const LANG_CLASSES = {
       "C": "accent-c",
@@ -1029,6 +1165,24 @@
       "CMake": "accent-cmake",
     };
 
+    function escapeHTML(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function compact(value) {
+      return new Intl.NumberFormat("en", { notation: "compact" }).format(value || 0);
+    }
+
+    function shortDate(dateValue) {
+      if (!dateValue) return "n/a";
+      return new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(new Date(dateValue));
+    }
+
     function renderCard(repo) {
       const accentClass = LANG_CLASSES[repo.language] || "accent-default";
 
@@ -1037,20 +1191,20 @@
         : "";
 
       const lang = repo.language
-        ? `<span class="project-lang">${repo.language}</span>`
+        ? `<span class="project-lang">${escapeHTML(repo.language)}</span>`
         : "";
 
       const tags = (repo.topics || []).slice(0, 4)
-        .map(t => `<span class="project-tag">${t}</span>`)
+        .map(t => `<span class="project-tag">${escapeHTML(t)}</span>`)
         .join("");
 
-      const desc = repo.description || "No description provided.";
+      const desc = escapeHTML(repo.description || "No description provided.");
 
-      return `<a class="project-card" href="${repo.html_url}" target="_blank" rel="noopener">
+      return `<a class="project-card" href="${escapeHTML(repo.html_url)}" target="_blank" rel="noopener">
                 <div class="project-accent ${accentClass}"></div>
                 <div class="project-body">
                     <div class="project-top">
-                        <span class="project-name">${repo.name}</span>
+                        <span class="project-name">${escapeHTML(repo.name)}</span>
                         ${lang}
                         ${stars}
                     </div>
@@ -1060,22 +1214,79 @@
             </a>`;
     }
 
+    function renderHighlight(repo, meta) {
+      const homepage = repo.homepage ? `<a href="${escapeHTML(repo.homepage)}" target="_blank" rel="noopener">Live page</a>` : "";
+      return `<article class="highlight-card">
+                <div class="highlight-top">
+                  <a class="highlight-name" href="${escapeHTML(repo.html_url)}" target="_blank" rel="noopener">${escapeHTML(repo.name)}</a>
+                  <span class="highlight-focus">${escapeHTML(meta.focus)}</span>
+                </div>
+                <p class="highlight-text">${escapeHTML(meta.details)}</p>
+                <div class="highlight-links">
+                  <span>${compact(repo.stargazers_count)} stars</span>
+                  <span>${compact(repo.forks_count)} forks</span>
+                  <span>updated ${shortDate(repo.updated_at)}</span>
+                  ${homepage}
+                </div>
+              </article>`;
+    }
+
+    function renderStats(profile, repos) {
+      const statsEl = document.getElementById("github-stats");
+      const stars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
+      const langCount = new Map();
+      for (const repo of repos) {
+        if (!repo.language) continue;
+        langCount.set(repo.language, (langCount.get(repo.language) || 0) + 1);
+      }
+      const topLanguage = [...langCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "n/a";
+
+      statsEl.innerHTML = `
+        <div class="github-stat"><span class="github-stat-label">Public Repos</span><span class="github-stat-value">${compact(profile.public_repos)}</span></div>
+        <div class="github-stat"><span class="github-stat-label">Followers</span><span class="github-stat-value">${compact(profile.followers)}</span></div>
+        <div class="github-stat"><span class="github-stat-label">Total Stars</span><span class="github-stat-value">${compact(stars)}</span></div>
+        <div class="github-stat"><span class="github-stat-label">Top Language</span><span class="github-stat-value">${escapeHTML(topLanguage)}</span></div>
+      `;
+    }
+
     async function loadRepos() {
       const grid = document.getElementById("projects-grid");
+      const highlights = document.getElementById("project-highlights");
       try {
-        const res = await fetch(
-          `https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`
-        );
-        if (!res.ok) throw new Error(res.statusText);
-        const repos = await res.json();
+        const [profileRes, reposRes] = await Promise.all([
+          fetch(`https://api.github.com/users/${USERNAME}`),
+          fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`)
+        ]);
+        if (!profileRes.ok || !reposRes.ok) throw new Error("GitHub request failed");
+
+        const profile = await profileRes.json();
+        const repos = await reposRes.json();
 
         const visible = repos
           .filter(r => !r.fork && !HIDDEN.has(r.name))
           .sort((a, b) => b.stargazers_count - a.stargazers_count
             || new Date(b.updated_at) - new Date(a.updated_at));
 
+        renderStats(profile, visible);
+
+        const byName = new Map(visible.map(repo => [repo.name.toLowerCase(), repo]));
+        const featuredCards = FEATURED_PROJECTS
+          .map((meta) => {
+            const repo = byName.get(meta.repo.toLowerCase());
+            if (!repo) return "";
+            return renderHighlight(repo, meta);
+          })
+          .filter(Boolean)
+          .join("");
+
+        highlights.innerHTML = featuredCards || `<div class="projects-error"><p>Featured projects are currently unavailable.</p></div>`;
+
         grid.innerHTML = visible.map(renderCard).join("");
       } catch {
+        document.getElementById("github-stats").innerHTML = `
+          <div class="github-stat"><span class="github-stat-label">GitHub</span><span class="github-stat-value">Unavailable</span></div>
+        `;
+        highlights.innerHTML = `<div class="projects-error"><p>Could not load highlighted project details.</p></div>`;
         grid.innerHTML = `<div class="projects-error">
                     <p>Could not load projects.</p>
                     <a href="https://github.com/${USERNAME}?tab=repositories">View on GitHub &rarr;</a>
