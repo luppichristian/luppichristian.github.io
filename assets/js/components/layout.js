@@ -1,7 +1,7 @@
 import { PROFILE } from "../data/site-data.js";
 
 export function renderLayout(content, routePath) {
-  const isCaseStudy = routePath.startsWith("/case-study/");
+  const isHome = routePath === "/";
   return `
     <div class="layout-shell">
       <div class="grid-overlay" aria-hidden="true"></div>
@@ -13,8 +13,9 @@ export function renderLayout(content, routePath) {
             christian luppi
           </a>
           <nav class="top-nav" aria-label="Primary">
-            <a data-link href="/" ${!isCaseStudy ? "aria-current=\"page\"" : ""}>Home</a>
+            <a data-link href="/" ${isHome ? "aria-current=\"page\"" : ""}>Home</a>
             <a data-link href="/#featured">Projects</a>
+            <a data-link href="/#repositories">Repositories</a>
             <a data-link href="/#skills">Skills</a>
             <a data-link href="/#oss">Open Source</a>
             <a data-link href="/#contact">Contact</a>

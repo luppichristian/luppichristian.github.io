@@ -1,7 +1,5 @@
 import { renderLayout } from "./components/layout.js";
 import { hydrateHomePage, renderHomePage } from "./pages/home.js";
-import { getCaseStudyBySlug, renderCaseStudyPage } from "./pages/case-study.js";
-import { initHeroShader, initParticleField } from "./lib/graphics.js";
 import { initParallax, runPageEntrance, runViewTransition } from "./lib/motion.js";
 
 function normalize(pathname) {
@@ -12,8 +10,7 @@ function normalize(pathname) {
 function getRoute(pathname) {
   const path = normalize(pathname);
   if (path === "/") return { page: "home" };
-  const match = path.match(/^\/case-study\/([a-z0-9-]+)$/i);
-  if (match) return { page: "case", slug: match[1] };
+  if (path.startsWith("/case-study/")) return { page: "home" };
   return { page: "notfound" };
 }
 
@@ -29,46 +26,21 @@ function renderNotFound() {
   `;
 }
 
-let shaderCleanup = () => {};
-let particlesCleanup = () => {};
-
-function cleanGraphics() {
-  shaderCleanup();
-  particlesCleanup();
-  shaderCleanup = () => {};
-  particlesCleanup = () => {};
-}
-
 async function afterRender(route) {
   await runPageEntrance(document.getElementById("app"));
   if (route.page === "home") {
-    const shaderCanvas = document.getElementById("hero-shader-canvas");
-    const particleCanvas = document.getElementById("hero-particles-canvas");
-    shaderCleanup = initHeroShader(shaderCanvas);
-    particlesCleanup = initParticleField(particleCanvas);
     initParallax(".project-card");
     hydrateHomePage();
   }
 }
 
 async function render(pathname) {
-  cleanGraphics();
-
   const route = getRoute(pathname);
   let pageHtml = "";
 
   if (route.page === "home") {
     pageHtml = renderHomePage();
     document.title = "Christian Luppi | Systems Programmer & Creative Developer";
-  } else if (route.page === "case") {
-    const study = getCaseStudyBySlug(route.slug);
-    if (!study) {
-      pageHtml = renderNotFound();
-      document.title = "Not Found | Christian Luppi";
-    } else {
-      pageHtml = renderCaseStudyPage(study);
-      document.title = `${study.title} | Christian Luppi`;
-    }
   } else {
     pageHtml = renderNotFound();
     document.title = "Not Found | Christian Luppi";

@@ -1,7 +1,7 @@
 {
   "name": "Christian Luppi - Engine Room Portfolio",
   "short_name": "Luppi Portfolio",
-  "description": "Immersive systems programming portfolio with SDL, GPU, and engine architecture case studies.",
+  "description": "Immersive systems programming portfolio with SDL, GPU, and a complete live GitHub repository list.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#06080d",

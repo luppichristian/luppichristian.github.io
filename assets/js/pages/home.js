@@ -1,25 +1,46 @@
-import { CONTRIBUTIONS, PROFILE, PROJECTS, SKILL_GROUPS } from "../data/site-data.js";
+import { CONTRIBUTIONS, PROFILE, SKILL_GROUPS } from "../data/site-data.js";
 import { compactNumber, createSvgForProject, escapeHtml } from "../lib/dom.js";
 
-function projectCard(project, index) {
-  const sizeClass = project.size === "lg" ? "project-card--lg" : project.size === "md" ? "project-card--md" : "project-card--sm";
-  const transitionName = `project-visual-${project.slug}`;
+const VISUAL_TYPES = ["sdl", "gpu", "engine"];
+
+function featuredRepoCard(repo, index) {
+  const sizeClass = index === 0 ? "project-card--lg" : index === 1 ? "project-card--md" : "project-card--sm";
+  const transitionName = `project-visual-${escapeHtml(repo.name.toLowerCase())}`;
+  const type = VISUAL_TYPES[index % VISUAL_TYPES.length];
+  const stars = compactNumber(repo.stargazers_count || 0);
+  const language = repo.language || "n/a";
   return `
-    <a class="project-card ${sizeClass} scanline" data-project-card data-link href="/case-study/${project.slug}" data-slug="${project.slug}" data-stagger>
+    <a class="project-card ${sizeClass} scanline" data-project-card href="${repo.html_url}" target="_blank" rel="noopener" data-stagger>
       <div class="project-visual" style="view-transition-name: ${transitionName}">
-        ${createSvgForProject(project.diagram)}
+        ${createSvgForProject(type)}
       </div>
       <div class="project-content">
         <div class="project-meta">
-          <span class="project-chip">${escapeHtml(project.label)}</span>
-          ${project.stack.map((tag) => `<span class="project-chip">${escapeHtml(tag)}</span>`).join("")}
+          <span class="project-chip">${escapeHtml(language)}</span>
+          <span class="project-chip">${stars} stars</span>
         </div>
-        <h3>${escapeHtml(project.title)}</h3>
-        <p>${escapeHtml(project.summary)}</p>
+        <h3>${escapeHtml(repo.name)}</h3>
+        <p>${escapeHtml(repo.description || "No description provided.")}</p>
         <div class="project-links">
-          <span>Case Study #${index + 1}</span>
-          <span>Open</span>
+          <span>Updated ${new Date(repo.updated_at).toLocaleDateString("en", { month: "short", year: "numeric" })}</span>
+          <span>Open Repo</span>
         </div>
+      </div>
+    </a>
+  `;
+}
+
+function repoListItem(repo) {
+  const language = repo.language || "n/a";
+  return `
+    <a class="repo-row" href="${repo.html_url}" target="_blank" rel="noopener">
+      <div>
+        <h3>${escapeHtml(repo.name)}</h3>
+        <p>${escapeHtml(repo.description || "No description provided.")}</p>
+      </div>
+      <div class="repo-row-meta">
+        <span>${escapeHtml(language)}</span>
+        <span>${compactNumber(repo.stargazers_count || 0)} stars</span>
       </div>
     </a>
   `;
@@ -49,33 +70,31 @@ export function renderHomePage() {
   return `
     <section class="hero">
       <div class="content-wrap hero-grid">
-        <article class="hero-copy scanline" data-stagger>
-          <p class="hero-tag">Engine Room Portfolio</p>
-          <h1 class="hero-title">Building systems where performance is a feature.<span class="mono">Christian Luppi</span></h1>
-          <p class="hero-body">
-            I design low-level software for rendering, runtime architecture, and toolchains.
-            This portfolio focuses on how systems are actually built: constraints, implementation detail,
-            and measurable outcomes.
-          </p>
-          <div class="hero-points">
-            <p class="hero-point">C/C++ runtime architecture for game and tools code</p>
-            <p class="hero-point">GPU pipeline and shader packaging across backends</p>
-            <p class="hero-point">Deterministic testing workflows for engine reliability</p>
-          </div>
-          <div class="hero-actions">
-            <a class="button button--primary" data-link href="/#featured">Explore Case Studies</a>
-            <a class="button" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>
+        <article class="hero-copy" data-stagger>
+          <div class="hero-shell">
+            <div class="hero-main">
+              <p class="hero-tag">Engine Room Portfolio</p>
+              <h1 class="hero-title">
+                <span class="hero-title-line">Building systems where performance is a feature.</span>
+                <span class="mono">Christian Luppi</span>
+              </h1>
+              <p class="hero-body">
+                I design low-level software for rendering, runtime architecture, and toolchains.
+                This portfolio focuses on how systems are actually built: constraints, implementation detail,
+                and measurable outcomes.
+              </p>
+              <div class="hero-points">
+                <p class="hero-point">C/C++ runtime architecture for game and tools code</p>
+                <p class="hero-point">GPU pipeline and shader packaging across backends</p>
+                <p class="hero-point">Deterministic testing workflows for engine reliability</p>
+              </div>
+              <div class="hero-actions">
+                <a class="button button--primary" data-link href="/#featured">Explore Projects</a>
+                <a class="button" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>
+              </div>
+            </div>
           </div>
         </article>
-        <aside class="hero-render" data-stagger>
-          <canvas id="hero-shader-canvas" aria-hidden="true"></canvas>
-          <canvas id="hero-particles-canvas" aria-hidden="true" style="position:absolute;inset:0;"></canvas>
-          <div class="hero-hud" aria-hidden="true">
-            <div class="hud-item"><span class="hud-label">Target</span><span class="hud-value">16.6 ms</span></div>
-            <div class="hud-item"><span class="hud-label">Domain</span><span class="hud-value">GPU / Systems</span></div>
-            <div class="hud-item"><span class="hud-label">Status</span><span class="hud-value">Shipping</span></div>
-          </div>
-        </aside>
       </div>
     </section>
 
@@ -85,10 +104,24 @@ export function renderHomePage() {
           <p class="section-kicker">Featured Projects</p>
           <div class="section-line"></div>
         </div>
-        <h2 class="section-title" data-stagger>Bento case-study grid</h2>
-        <p class="section-description" data-stagger>Each project expands into a detailed technical case study with challenge, stack, implementation details, and architecture diagrams.</p>
+        <h2 class="section-title" data-stagger>Highlighted repositories</h2>
+        <p class="section-description" data-stagger>Real repositories from GitHub, ranked by stars and recency.</p>
         <div class="bento-grid" id="project-bento">
-          ${PROJECTS.map(projectCard).join("")}
+          <p class="repo-loading">Loading featured repositories...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="repositories">
+      <div class="content-wrap">
+        <div class="section-head" data-stagger>
+          <p class="section-kicker">All Repositories</p>
+          <div class="section-line"></div>
+        </div>
+        <h2 class="section-title" data-stagger>Complete GitHub repository list</h2>
+        <p class="section-description" data-stagger>Public non-fork repositories with at least one star.</p>
+        <div class="repo-list" id="repo-list" aria-live="polite">
+          <p class="repo-loading">Loading repositories...</p>
         </div>
       </div>
     </section>
@@ -165,6 +198,8 @@ export function renderHomePage() {
 
 export async function hydrateHomePage() {
   const statsEl = document.getElementById("github-stats");
+  const bentoEl = document.getElementById("project-bento");
+  const repoListEl = document.getElementById("repo-list");
   if (!statsEl) return;
 
   try {
@@ -176,6 +211,9 @@ export async function hydrateHomePage() {
     const user = await userRes.json();
     const repos = await reposRes.json();
     const visible = repos.filter((repo) => !repo.fork);
+    const starred = visible.filter((repo) => (repo.stargazers_count || 0) >= 1);
+    const featured = [...starred].sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0) || new Date(b.updated_at) - new Date(a.updated_at)).slice(0, 3);
+    const allSorted = [...starred].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
     let topLanguage = "n/a";
     const map = new Map();
@@ -195,10 +233,30 @@ export async function hydrateHomePage() {
       <div class="stat"><p class="stat-label">Stars</p><p class="stat-value">${compactNumber(stars)}</p></div>
       <div class="stat"><p class="stat-label">Top Language</p><p class="stat-value">${escapeHtml(topLanguage)}</p></div>
     `;
+
+    if (bentoEl) {
+      bentoEl.innerHTML = featured.length
+        ? featured.map((repo, index) => featuredRepoCard(repo, index)).join("")
+        : `<p class="repo-loading">No repositories found.</p>`;
+    }
+
+    if (repoListEl) {
+      repoListEl.innerHTML = allSorted.length
+        ? allSorted.map(repoListItem).join("")
+        : `<p class="repo-loading">No repositories found.</p>`;
+    }
   } catch {
     statsEl.innerHTML = `
       <div class="stat"><p class="stat-label">GitHub</p><p class="stat-value">Unavailable</p></div>
       <div class="stat"><p class="stat-label">Fallback</p><p class="stat-value">Profile link only</p></div>
     `;
+
+    if (bentoEl) {
+      bentoEl.innerHTML = `<p class="repo-loading">Featured repositories unavailable.</p>`;
+    }
+
+    if (repoListEl) {
+      repoListEl.innerHTML = `<p class="repo-loading">Repository list unavailable. Visit <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>.</p>`;
+    }
   }
 }
