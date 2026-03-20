@@ -1,21 +1,21 @@
 {
-    "name": "Christian Luppi - Portfolio",
-    "short_name": "Christian Luppi",
-    "description": "Systems programmer from Italy specializing in C/C++, game engine development, GPU programming, and performance optimization.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0a0a0f",
-    "theme_color": "#0a0a0f",
-    "icons": [
-        {
-            "src": "https://avatars.githubusercontent.com/u/88738387?s=192&v=4",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "https://avatars.githubusercontent.com/u/88738387?s=512&v=4",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "Christian Luppi - Engine Room Portfolio",
+  "short_name": "Luppi Portfolio",
+  "description": "Immersive systems programming portfolio with SDL, GPU, and engine architecture case studies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06080d",
+  "theme_color": "#06080d",
+  "icons": [
+    {
+      "src": "https://avatars.githubusercontent.com/u/88738387?s=192&v=4",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://avatars.githubusercontent.com/u/88738387?s=512&v=4",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
