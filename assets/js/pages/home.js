@@ -1,4 +1,4 @@
-import { CONTRIBUTIONS, PROFILE, SKILL_GROUPS } from "../data/site-data.js";
+import { CONTRIBUTIONS, ITCH_PROFILE, ITCH_PROJECTS, PROFILE, SKILL_GROUPS } from "../data/site-data.js";
 import { compactNumber, createSvgForProject, escapeHtml } from "../lib/dom.js";
 
 const VISUAL_TYPES = ["sdl", "gpu", "engine"];
@@ -66,6 +66,33 @@ function contribution(item) {
   `;
 }
 
+function itchProjectCard(project) {
+  return `
+    <a class="itch-card" href="${project.url}" target="_blank" rel="noopener" data-stagger>
+      <div class="itch-card-media">
+        <img src="${project.image}" alt="${escapeHtml(project.title)} cover art" loading="lazy">
+      </div>
+      <div class="itch-card-body">
+        <div class="itch-card-meta">
+          <span class="project-chip project-chip--itch">${escapeHtml(project.category)}</span>
+          <span class="project-chip">${escapeHtml(project.status)}</span>
+          <span class="project-chip">${escapeHtml(project.price)}</span>
+        </div>
+        <h3>${escapeHtml(project.title)}</h3>
+        <p>${escapeHtml(project.description)}</p>
+        <div class="itch-card-tags">
+          ${project.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}
+        </div>
+        <div class="itch-card-footer">
+          <span>${escapeHtml(project.platforms.join(" / "))}</span>
+          <span>Published ${escapeHtml(project.published)}</span>
+          <span>Open on itch.io</span>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
 export function renderHomePage() {
   return `
     <section class="hero">
@@ -90,6 +117,7 @@ export function renderHomePage() {
               </div>
               <div class="hero-actions">
                 <a class="button button--primary" data-link href="/#featured">Explore Projects</a>
+                <a class="button" href="${PROFILE.itch}" target="_blank" rel="noopener">itch.io</a>
                 <a class="button" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>
               </div>
             </div>
@@ -104,24 +132,22 @@ export function renderHomePage() {
           <p class="section-kicker">Featured Projects</p>
           <div class="section-line"></div>
         </div>
-        <h2 class="section-title" data-stagger>Highlighted repositories</h2>
-        <p class="section-description" data-stagger>Real repositories from GitHub, ranked by stars and recency.</p>
-        <div class="bento-grid" id="project-bento">
-          <p class="repo-loading">Loading featured repositories...</p>
+        <div class="itch-intro" data-stagger>
+          <div>
+            <h2 class="section-title">Released desktop tools on itch.io</h2>
+            <p class="section-description">${escapeHtml(ITCH_PROFILE.description)}</p>
+          </div>
+          <div class="itch-profile-panel scanline">
+            <p class="itch-profile-overline">${escapeHtml(ITCH_PROFILE.handle)}</p>
+            <p class="itch-profile-count">${ITCH_PROFILE.releasedCount} released projects</p>
+            <div class="itch-profile-focus">
+              ${ITCH_PROFILE.focus.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+            </div>
+            <a class="button button--itch" href="${ITCH_PROFILE.url}" target="_blank" rel="noopener">Visit itch.io Profile</a>
+          </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section" id="repositories">
-      <div class="content-wrap">
-        <div class="section-head" data-stagger>
-          <p class="section-kicker">All Repositories</p>
-          <div class="section-line"></div>
-        </div>
-        <h2 class="section-title" data-stagger>Complete GitHub repository list</h2>
-        <p class="section-description" data-stagger>Public non-fork repositories with at least one star.</p>
-        <div class="repo-list" id="repo-list" aria-live="polite">
-          <p class="repo-loading">Loading repositories...</p>
+        <div class="itch-grid">
+          ${ITCH_PROJECTS.map(itchProjectCard).join("")}
         </div>
       </div>
     </section>
@@ -170,6 +196,23 @@ export function renderHomePage() {
       </div>
     </section>
 
+    <section class="section" id="repositories">
+      <div class="content-wrap">
+        <div class="section-head" data-stagger>
+          <p class="section-kicker">GitHub Projects</p>
+          <div class="section-line"></div>
+        </div>
+        <h2 class="section-title" data-stagger>Open-source repositories and live profile stats</h2>
+        <p class="section-description" data-stagger>GitHub now sits lower in the page: featured repo highlights first, then the complete public non-fork repository list with at least one star.</p>
+        <div class="bento-grid" id="project-bento">
+          <p class="repo-loading">Loading featured repositories...</p>
+        </div>
+        <div class="repo-list" id="repo-list" aria-live="polite">
+          <p class="repo-loading">Loading repositories...</p>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="contact">
       <div class="content-wrap">
         <div class="section-head" data-stagger>
@@ -185,6 +228,10 @@ export function renderHomePage() {
           <article class="contact-card" data-stagger>
             <h3>GitHub</h3>
             <a href="${PROFILE.github}" target="_blank" rel="noopener">github.com/luppichristian</a>
+          </article>
+          <article class="contact-card" data-stagger>
+            <h3>itch.io</h3>
+            <a href="${PROFILE.itch}" target="_blank" rel="noopener">christian-luppi.itch.io</a>
           </article>
           <article class="contact-card" data-stagger>
             <h3>Social</h3>

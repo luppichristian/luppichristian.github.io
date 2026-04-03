@@ -14,7 +14,7 @@ export function renderLayout(content, routePath) {
           </a>
           <nav class="top-nav" aria-label="Primary">
             <a data-link href="/" ${isHome ? "aria-current=\"page\"" : ""}>Home</a>
-            <a data-link href="/#featured">Projects</a>
+            <a data-link href="/#featured">itch.io</a>
             <a data-link href="/#repositories">Repositories</a>
             <a data-link href="/#skills">Skills</a>
             <a data-link href="/#oss">Open Source</a>
@@ -28,6 +28,7 @@ export function renderLayout(content, routePath) {
           <p class="footer-copy">© ${new Date().getFullYear()} ${PROFILE.name} · Systems and graphics engineering</p>
           <nav class="footer-links" aria-label="Social links">
             <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>
+            <a href="${PROFILE.itch}" target="_blank" rel="noopener">itch.io</a>
             <a href="${PROFILE.x}" target="_blank" rel="noopener">X</a>
             <a href="${PROFILE.youtube}" target="_blank" rel="noopener">YouTube</a>
             <a href="${PROFILE.kofi}" target="_blank" rel="noopener">Ko-fi</a>
