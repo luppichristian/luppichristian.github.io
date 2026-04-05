@@ -1,67 +1,48 @@
-import { CONTRIBUTIONS, ITCH_PROFILE, ITCH_PROJECTS, PROFILE, SKILL_GROUPS } from "../data/site-data.js";
-import { compactNumber, createSvgForProject, escapeHtml } from "../lib/dom.js";
+import { ITCH_PROJECTS, PROFILE, REPOSITORIES } from "../data/site-data.js";
+import { compactNumber, escapeHtml } from "../lib/dom.js";
+const WHAT_I_DO = [
+  "I build C and C++ tools for graphics, rendering, and low-level systems work.",
+  "I work on custom engine code, multithreaded systems, and performance-focused runtime design.",
+  "I make desktop diagnostic apps like GFX Support View and Win32 Input Tester.",
+  "I share open source projects for testing, parsing, math, shaders, and developer tooling on GitHub."
+];
 
-const VISUAL_TYPES = ["sdl", "gpu", "engine"];
+function getStarredRepositories(repos) {
+  return repos.filter((repo) => (repo.stars || repo.stargazers_count || 0) >= 1);
+}
 
-function featuredRepoCard(repo, index) {
-  const sizeClass = index === 0 ? "project-card--lg" : index === 1 ? "project-card--md" : "project-card--sm";
-  const transitionName = `project-visual-${escapeHtml(repo.name.toLowerCase())}`;
-  const type = VISUAL_TYPES[index % VISUAL_TYPES.length];
-  const stars = compactNumber(repo.stargazers_count || 0);
-  const language = repo.language || "n/a";
-  return `
-    <a class="project-card ${sizeClass} scanline" data-project-card href="${repo.html_url}" target="_blank" rel="noopener" data-stagger>
-      <div class="project-visual" style="view-transition-name: ${transitionName}">
-        ${createSvgForProject(type)}
-      </div>
-      <div class="project-content">
-        <div class="project-meta">
-          <span class="project-chip">${escapeHtml(language)}</span>
-          <span class="project-chip">${stars} stars</span>
-        </div>
-        <h3>${escapeHtml(repo.name)}</h3>
-        <p>${escapeHtml(repo.description || "No description provided.")}</p>
-        <div class="project-links">
-          <span>Updated ${new Date(repo.updated_at).toLocaleDateString("en", { month: "short", year: "numeric" })}</span>
-          <span>Open Repo</span>
-        </div>
-      </div>
-    </a>
-  `;
+function sortRepositories(repos) {
+  return [...repos].sort((a, b) => {
+    const starDiff = (b.stars || b.stargazers_count || 0) - (a.stars || a.stargazers_count || 0);
+    if (starDiff !== 0) return starDiff;
+    return new Date(b.updated || b.updated_at) - new Date(a.updated || a.updated_at);
+  });
 }
 
 function repoListItem(repo) {
   const language = repo.language || "n/a";
+  const repoUrl = repo.url || repo.html_url;
+  const stars = compactNumber(repo.stars || repo.stargazers_count || 0);
+  const updated = new Date(repo.updated || repo.updated_at).toLocaleDateString("en", { month: "short", year: "numeric" });
   return `
-    <a class="repo-row" href="${repo.html_url}" target="_blank" rel="noopener">
+    <a class="repo-row" href="${repoUrl}" target="_blank" rel="noopener">
       <div>
         <h3>${escapeHtml(repo.name)}</h3>
         <p>${escapeHtml(repo.description || "No description provided.")}</p>
       </div>
       <div class="repo-row-meta">
         <span>${escapeHtml(language)}</span>
-        <span>${compactNumber(repo.stargazers_count || 0)} stars</span>
+        <span>${stars} stars</span>
+        <span>Updated ${updated}</span>
       </div>
     </a>
   `;
 }
 
-function skillCard(group) {
-  return `
-    <article class="skills-card" data-stagger>
-      <h3>${escapeHtml(group.title)}</h3>
-      <ul class="skills-list">
-        ${group.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-      </ul>
-    </article>
-  `;
-}
-
-function contribution(item) {
+function whatIDoItem(item) {
   return `
     <li class="contrib-item" data-stagger>
-      <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.description)}</p>
+      <p>${escapeHtml(item)}</p>
     </li>
   `;
 }
@@ -94,56 +75,38 @@ function itchProjectCard(project) {
 }
 
 export function renderHomePage() {
+  const allRepos = sortRepositories(getStarredRepositories(REPOSITORIES));
+
   return `
-    <section class="hero">
-      <div class="content-wrap hero-grid">
-        <article class="hero-copy" data-stagger>
-          <div class="hero-shell">
-            <div class="hero-main">
-              <p class="hero-tag">Engine Room Portfolio</p>
-              <h1 class="hero-title">
-                <span class="hero-title-line">Building systems where performance is a feature.</span>
-                <span class="mono">Christian Luppi</span>
-              </h1>
-              <p class="hero-body">
-                I design low-level software for rendering, runtime architecture, and toolchains.
-                This portfolio focuses on how systems are actually built: constraints, implementation detail,
-                and measurable outcomes.
-              </p>
-              <div class="hero-points">
-                <p class="hero-point">C/C++ runtime architecture for game and tools code</p>
-                <p class="hero-point">GPU pipeline and shader packaging across backends</p>
-                <p class="hero-point">Deterministic testing workflows for engine reliability</p>
-              </div>
-              <div class="hero-actions">
-                <a class="button button--primary" data-link href="/#featured">Explore Projects</a>
-                <a class="button" href="${PROFILE.itch}" target="_blank" rel="noopener">itch.io</a>
-                <a class="button" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>
-              </div>
-            </div>
-          </div>
-        </article>
+    <section class="section" id="what-i-do">
+      <div class="content-wrap">
+        <div class="section-head" data-stagger>
+          <p class="section-kicker">What I Do</p>
+          <div class="section-line"></div>
+        </div>
+        <div class="single-panel">
+          <article class="oss-panel" data-stagger>
+            <ul class="contrib-list">
+              ${WHAT_I_DO.map(whatIDoItem).join("")}
+            </ul>
+          </article>
+        </div>
       </div>
     </section>
 
-    <section class="section" id="featured">
+    <section class="section" id="releases">
       <div class="content-wrap">
         <div class="section-head" data-stagger>
-          <p class="section-kicker">Featured Projects</p>
+          <p class="section-kicker">Releases</p>
           <div class="section-line"></div>
         </div>
         <div class="itch-intro" data-stagger>
-          <div>
-            <h2 class="section-title">Released desktop tools on itch.io</h2>
-            <p class="section-description">${escapeHtml(ITCH_PROFILE.description)}</p>
-          </div>
-          <div class="itch-profile-panel scanline">
-            <p class="itch-profile-overline">${escapeHtml(ITCH_PROFILE.handle)}</p>
-            <p class="itch-profile-count">${ITCH_PROFILE.releasedCount} released projects</p>
-            <div class="itch-profile-focus">
-              ${ITCH_PROFILE.focus.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+          <div class="summary-panel scanline">
+            <div class="summary-panel-copy">
+              <p class="summary-panel-overline">Itch</p>
+              <p class="summary-panel-count">${ITCH_PROJECTS.length} projects</p>
             </div>
-            <a class="button button--itch" href="${ITCH_PROFILE.url}" target="_blank" rel="noopener">Visit itch.io Profile</a>
+            <a class="button button--itch" href="${PROFILE.itch}" target="_blank" rel="noopener">Visit Itch Profile</a>
           </div>
         </div>
         <div class="itch-grid">
@@ -152,74 +115,33 @@ export function renderHomePage() {
       </div>
     </section>
 
-    <section class="section" id="skills">
+    <section class="section" id="open-source">
       <div class="content-wrap">
         <div class="section-head" data-stagger>
-          <p class="section-kicker">Technical Skills</p>
+          <p class="section-kicker">Open Source</p>
           <div class="section-line"></div>
         </div>
-        <h2 class="section-title" data-stagger>Interactive systems profile</h2>
-        <p class="section-description" data-stagger>Focused on runtime correctness, rendering depth, and performance-conscious engineering across native and tooling code.</p>
-        <div class="skills-matrix">
-          ${SKILL_GROUPS.map(skillCard).join("")}
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="oss">
-      <div class="content-wrap">
-        <div class="section-head" data-stagger>
-          <p class="section-kicker">Open Source Contributions</p>
-          <div class="section-line"></div>
-        </div>
-        <h2 class="section-title" data-stagger>From architecture intent to public code</h2>
-        <div class="oss-grid">
-          <article class="oss-panel" data-stagger>
-            <h3 class="sr-only">Contribution timeline</h3>
-            <ul class="contrib-list">
-              ${CONTRIBUTIONS.map(contribution).join("")}
-            </ul>
-          </article>
-          <article class="oss-panel" data-stagger>
-            <h3 style="margin-top:0;font:700 0.84rem/1.2 var(--mono);letter-spacing:0.06em;text-transform:uppercase;color:var(--text-1);">Live GitHub Stats</h3>
-            <div class="stats-grid" id="github-stats" aria-live="polite">
-              <div class="stat"><p class="stat-label">Public Repos</p><p class="stat-value">--</p></div>
-              <div class="stat"><p class="stat-label">Followers</p><p class="stat-value">--</p></div>
-              <div class="stat"><p class="stat-label">Stars</p><p class="stat-value">--</p></div>
-              <div class="stat"><p class="stat-label">Top Language</p><p class="stat-value">--</p></div>
+        <div class="repo-intro" data-stagger>
+          <div class="summary-panel scanline">
+            <div class="summary-panel-copy">
+              <p class="summary-panel-overline">GitHub</p>
+              <p class="summary-panel-count">${allRepos.length} repositories</p>
             </div>
-            <p style="margin:0.8rem 0 0;color:var(--text-2);font:500 0.75rem/1.5 var(--mono);">
-              Designed for lightweight loading. Data is fetched once and rendered with no framework runtime.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="repositories">
-      <div class="content-wrap">
-        <div class="section-head" data-stagger>
-          <p class="section-kicker">GitHub Projects</p>
-          <div class="section-line"></div>
-        </div>
-        <h2 class="section-title" data-stagger>Open-source repositories and live profile stats</h2>
-        <p class="section-description" data-stagger>GitHub now sits lower in the page: featured repo highlights first, then the complete public non-fork repository list with at least one star.</p>
-        <div class="bento-grid" id="project-bento">
-          <p class="repo-loading">Loading featured repositories...</p>
+            <a class="button" href="${PROFILE.github}" target="_blank" rel="noopener">Visit GitHub</a>
+          </div>
         </div>
         <div class="repo-list" id="repo-list" aria-live="polite">
-          <p class="repo-loading">Loading repositories...</p>
+          ${allRepos.map(repoListItem).join("")}
         </div>
       </div>
     </section>
 
-    <section class="section" id="contact">
+    <section class="section" id="contacts">
       <div class="content-wrap">
         <div class="section-head" data-stagger>
-          <p class="section-kicker">Contact</p>
+          <p class="section-kicker">Contacts</p>
           <div class="section-line"></div>
         </div>
-        <h2 class="section-title" data-stagger>Let&apos;s build engine-grade software</h2>
         <div class="contact-grid">
           <article class="contact-card" data-stagger>
             <h3>Email</h3>
@@ -234,8 +156,8 @@ export function renderHomePage() {
             <a href="${PROFILE.itch}" target="_blank" rel="noopener">christian-luppi.itch.io</a>
           </article>
           <article class="contact-card" data-stagger>
-            <h3>Social</h3>
-            <a href="${PROFILE.x}" target="_blank" rel="noopener">x.com/luppi_christian</a>
+            <h3>YouTube</h3>
+            <a href="${PROFILE.youtube}" target="_blank" rel="noopener">youtube.com/@christianluppi</a>
           </article>
         </div>
       </div>
@@ -244,48 +166,16 @@ export function renderHomePage() {
 }
 
 export async function hydrateHomePage() {
-  const statsEl = document.getElementById("github-stats");
-  const bentoEl = document.getElementById("project-bento");
   const repoListEl = document.getElementById("repo-list");
-  if (!statsEl) return;
+  if (!repoListEl) return;
 
   try {
-    const [userRes, reposRes] = await Promise.all([
-      fetch("https://api.github.com/users/luppichristian"),
-      fetch("https://api.github.com/users/luppichristian/repos?per_page=100")
-    ]);
-    if (!userRes.ok || !reposRes.ok) throw new Error("github failed");
-    const user = await userRes.json();
+    const reposRes = await fetch("https://api.github.com/users/luppichristian/repos?per_page=100");
+    if (!reposRes.ok) throw new Error("github failed");
+
     const repos = await reposRes.json();
-    const visible = repos.filter((repo) => !repo.fork);
-    const starred = visible.filter((repo) => (repo.stargazers_count || 0) >= 1);
-    const featured = [...starred].sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0) || new Date(b.updated_at) - new Date(a.updated_at)).slice(0, 3);
-    const allSorted = [...starred].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-
-    let topLanguage = "n/a";
-    const map = new Map();
-    let stars = 0;
-
-    for (const repo of visible) {
-      stars += repo.stargazers_count || 0;
-      if (repo.language) map.set(repo.language, (map.get(repo.language) || 0) + 1);
-    }
-    if (map.size) {
-      topLanguage = [...map.entries()].sort((a, b) => b[1] - a[1])[0][0];
-    }
-
-    statsEl.innerHTML = `
-      <div class="stat"><p class="stat-label">Public Repos</p><p class="stat-value">${compactNumber(user.public_repos)}</p></div>
-      <div class="stat"><p class="stat-label">Followers</p><p class="stat-value">${compactNumber(user.followers)}</p></div>
-      <div class="stat"><p class="stat-label">Stars</p><p class="stat-value">${compactNumber(stars)}</p></div>
-      <div class="stat"><p class="stat-label">Top Language</p><p class="stat-value">${escapeHtml(topLanguage)}</p></div>
-    `;
-
-    if (bentoEl) {
-      bentoEl.innerHTML = featured.length
-        ? featured.map((repo, index) => featuredRepoCard(repo, index)).join("")
-        : `<p class="repo-loading">No repositories found.</p>`;
-    }
+    const visible = repos.filter((repo) => !repo.fork && (repo.stargazers_count || 0) >= 1);
+    const allSorted = sortRepositories(visible);
 
     if (repoListEl) {
       repoListEl.innerHTML = allSorted.length
@@ -293,15 +183,6 @@ export async function hydrateHomePage() {
         : `<p class="repo-loading">No repositories found.</p>`;
     }
   } catch {
-    statsEl.innerHTML = `
-      <div class="stat"><p class="stat-label">GitHub</p><p class="stat-value">Unavailable</p></div>
-      <div class="stat"><p class="stat-label">Fallback</p><p class="stat-value">Profile link only</p></div>
-    `;
-
-    if (bentoEl) {
-      bentoEl.innerHTML = `<p class="repo-loading">Featured repositories unavailable.</p>`;
-    }
-
     if (repoListEl) {
       repoListEl.innerHTML = `<p class="repo-loading">Repository list unavailable. Visit <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>.</p>`;
     }

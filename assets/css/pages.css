@@ -93,8 +93,8 @@
 }
 
 .project-chip--itch {
-  border-color: rgba(250, 92, 92, 0.42);
-  color: #ffc0c0;
+  border-color: rgba(54, 194, 255, 0.38);
+  color: var(--text-0);
 }
 
 .project-card h3 {
@@ -168,6 +168,10 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 0.9rem;
+}
+
+.single-panel {
+  margin-top: 1.3rem;
 }
 
 .oss-panel {
@@ -262,31 +266,44 @@
   gap: 0.7rem;
 }
 
-.itch-intro {
+.itch-intro,
+.repo-intro {
   margin-top: 1rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
-  gap: 0.9rem;
-  align-items: start;
+  display: block;
 }
 
-.itch-profile-panel {
-  border: 1px solid rgba(250, 92, 92, 0.2);
+.summary-panel {
+  width: 100%;
+  border: 1px solid rgba(54, 194, 255, 0.24);
   border-radius: var(--radius-md);
-  background: linear-gradient(145deg, rgba(42, 20, 24, 0.95), rgba(17, 11, 17, 0.96));
+  background: linear-gradient(145deg, rgba(14, 27, 41, 0.95), rgba(10, 16, 25, 0.96));
   padding: 1rem;
-  box-shadow: 0 14px 34px rgba(18, 5, 10, 0.35);
+  box-shadow: 0 14px 34px rgba(2, 12, 24, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.itch-profile-overline {
+.summary-panel .button,
+.summary-panel .button--itch {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.summary-panel-copy {
+  min-width: 0;
+}
+
+.summary-panel-overline {
   margin: 0;
-  color: #ff8f8f;
+  color: var(--accent-electric);
   font: 700 0.7rem/1 var(--mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.itch-profile-count {
+.summary-panel-count {
   margin: 0.7rem 0 0;
   font: 700 clamp(1.35rem, 3vw, 2rem)/1.1 var(--sans);
   color: var(--text-0);
@@ -301,10 +318,10 @@
 
 .itch-profile-focus span,
 .itch-card-tags span {
-  border: 1px solid rgba(255, 176, 176, 0.18);
+  border: 1px solid rgba(54, 194, 255, 0.2);
   border-radius: 99px;
   padding: 0.26rem 0.58rem;
-  color: #f3c8c8;
+  color: var(--text-1);
   font: 600 0.66rem/1 var(--mono);
   letter-spacing: 0.04em;
   background: rgba(255, 255, 255, 0.03);
@@ -312,13 +329,13 @@
 
 .button--itch {
   margin-top: 1rem;
-  border-color: rgba(250, 92, 92, 0.45);
-  background: linear-gradient(130deg, rgba(250, 92, 92, 0.26), rgba(128, 36, 44, 0.18));
+  border-color: rgba(54, 194, 255, 0.45);
+  background: linear-gradient(130deg, rgba(54, 194, 255, 0.2), rgba(14, 47, 74, 0.22));
 }
 
 .button--itch:hover {
-  border-color: rgba(250, 92, 92, 0.68);
-  box-shadow: 0 0 1.2rem rgba(250, 92, 92, 0.18);
+  border-color: rgba(54, 194, 255, 0.68);
+  box-shadow: 0 0 1.2rem rgba(54, 194, 255, 0.18);
 }
 
 .itch-grid {
@@ -329,23 +346,23 @@
 }
 
 .itch-card {
-  border: 1px solid rgba(250, 92, 92, 0.18);
+  border: 1px solid rgba(54, 194, 255, 0.18);
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(30, 15, 20, 0.92), rgba(13, 10, 18, 0.98));
+  background: linear-gradient(180deg, rgba(13, 21, 34, 0.92), rgba(10, 16, 25, 0.98));
   color: var(--text-0);
   transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .itch-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(250, 92, 92, 0.46);
-  box-shadow: 0 18px 42px rgba(16, 4, 9, 0.36);
+  border-color: rgba(54, 194, 255, 0.46);
+  box-shadow: 0 18px 42px rgba(2, 12, 24, 0.36);
 }
 
 .itch-card-media {
   aspect-ratio: 315 / 250;
-  background: linear-gradient(180deg, rgba(56, 19, 25, 0.7), rgba(17, 11, 17, 0.95));
+  background: linear-gradient(180deg, rgba(17, 34, 52, 0.7), rgba(10, 16, 25, 0.95));
 }
 
 .itch-card-media img {
@@ -379,7 +396,7 @@
 }
 
 .itch-card-footer {
-  color: #f1c9c9;
+  color: var(--text-1);
   font: 600 0.67rem/1.4 var(--mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -466,6 +483,16 @@
   .itch-intro,
   .itch-grid {
     grid-template-columns: 1fr;
+  }
+
+  .summary-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary-panel .button,
+  .summary-panel .button--itch {
+    margin-top: 0.5rem;
   }
 
   .contact-grid {

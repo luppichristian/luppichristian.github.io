@@ -40,7 +40,7 @@ async function render(pathname) {
 
   if (route.page === "home") {
     pageHtml = renderHomePage();
-    document.title = "Christian Luppi | Systems Programmer & Creative Developer";
+    document.title = "Christian Luppi | Systems Programmer, Graphics Programmer, C/C++ Developer";
   } else {
     pageHtml = renderNotFound();
     document.title = "Not Found | Christian Luppi";
