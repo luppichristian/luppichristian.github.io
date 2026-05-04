@@ -215,6 +215,46 @@ canvas {
   padding: 2.2rem 0;
 }
 
+.simple-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.simple-list-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(12, 19, 30, 0.84);
+  padding: 1rem;
+}
+
+.simple-list-item h3 {
+  margin: 0 0 0.35rem;
+  font: 700 1rem/1.25 var(--sans);
+  color: var(--text-0);
+}
+
+.simple-list-item p {
+  margin: 0;
+  color: var(--text-1);
+  font-size: 0.92rem;
+}
+
+.simple-meta {
+  margin-top: 0.65rem !important;
+  color: var(--text-2) !important;
+  font: 600 0.68rem/1.4 var(--mono) !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.section-link {
+  margin: 0.9rem 0 0;
+  color: var(--text-1);
+}
+
 .site-footer {
   margin-top: 3.4rem;
   border-top: 1px solid var(--line);
@@ -484,10 +524,8 @@ canvas {
 }
 
 .contact-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: rgba(12, 19, 30, 0.84);
-  padding: 1rem;
+  display: grid;
+  gap: 0.4rem;
 }
 
 .contact-card h3 {

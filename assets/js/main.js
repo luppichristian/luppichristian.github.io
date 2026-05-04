@@ -42,11 +42,17 @@ const REPOSITORIES = [
   { name: "xccmeta", url: "https://github.com/luppichristian/xccmeta", description: "Static metadata parser for C/C++ projects, useful for preprocessing and build-time tooling.", language: "C++", stars: 3, updated: "2026-03-20T17:49:10Z" }
 ];
 
-const WHAT_I_DO = [
-  "I build C and C++ tools for graphics, rendering, and low-level systems work.",
-  "I work on custom engine code, multithreaded systems, and performance-focused runtime design.",
-  "I make desktop diagnostic apps like GFX Support View and Win32 Input Tester.",
-  "I share open source projects for testing, parsing, math, shaders, and developer tooling on GitHub."
+const SKILLS = [
+  "Core languages: C, C++, Python, JavaScript, SQL, HTML, and TypeScript.",
+  "Graphics programming: OpenGL, Vulkan, DirectX, SDL3 GPU, bgfx, modern GPU pipelines, and real-time rendering architecture.",
+  "Game programming: custom engine development and cross-platform work with SDL3, Raylib, and SFML.",
+  "Shader programming: fragment, vertex, and geometry shaders written in GLSL and HLSL.",
+  "Systems programming: low-level architecture, memory management, data structures, and cache-efficient design.",
+  "Performance engineering: SIMD optimization, CPU and GPU profiling, frame-time optimization, and data-oriented design.",
+  "Concurrency and parallelism: multithreaded programming, task-based systems, synchronization primitives, and high-performance runtime systems.",
+  "Tools and toolchains: RenderDoc, Tracy, CMake, Premake, Visual Studio, VS Code, Clang, GCC, MSVC, and GPU debugging workflows.",
+  "AI-assisted development: codegen pipelines, agent-assisted workflows, and productivity systems while keeping code quality standards.",
+  "Web and backend: full-stack web development, database design, and backend architecture."
 ];
 
 const CONTACTS = [
@@ -65,10 +71,6 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function compactNumber(value) {
-  return new Intl.NumberFormat("en", { notation: "compact" }).format(Number(value) || 0);
-}
-
 function sortRepositories(repos) {
   return [...repos].sort((a, b) => {
     const starDiff = (b.stars || b.stargazers_count || 0) - (a.stars || a.stargazers_count || 0);
@@ -84,26 +86,18 @@ function getStarredRepositories(repos) {
 function repoListItem(repo) {
   const language = repo.language || "n/a";
   const repoUrl = repo.html_url || repo.url;
-  const stars = compactNumber(repo.stars || repo.stargazers_count || 0);
-  const updated = new Date(repo.updated || repo.updated_at).toLocaleDateString("en", { month: "short", year: "numeric" });
   return `
-    <a class="repo-row" href="${repoUrl}" target="_blank" rel="noopener">
-      <div>
-        <h3>${escapeHtml(repo.name)}</h3>
-        <p>${escapeHtml(repo.description || "No description provided.")}</p>
-      </div>
-      <div class="repo-row-meta">
-        <span>${escapeHtml(language)}</span>
-        <span>${stars} stars</span>
-        <span>Updated ${updated}</span>
-      </div>
-    </a>
+    <li class="simple-list-item" data-stagger>
+      <h3><a href="${repoUrl}" target="_blank" rel="noopener">${escapeHtml(repo.name)}</a></h3>
+      <p>${escapeHtml(repo.description || "No description provided.")}</p>
+      <p class="simple-meta">${escapeHtml(language)}</p>
+    </li>
   `;
 }
 
-function whatIDoItem(item) {
+function skillItem(item) {
   return `
-    <li class="contrib-item" data-stagger>
+    <li class="simple-list-item" data-stagger>
       <p>${escapeHtml(item)}</p>
     </li>
   `;
@@ -118,52 +112,23 @@ function sectionHeader(title) {
   `;
 }
 
-function summaryPanel(label, count, buttonClass, buttonHref, buttonText) {
+function projectListItem(project) {
   return `
-    <div class="summary-panel scanline">
-      <div class="summary-panel-copy">
-        <p class="summary-panel-overline">${escapeHtml(label)}</p>
-        <p class="summary-panel-count">${count}</p>
-      </div>
-      <a class="button ${buttonClass}" href="${buttonHref}" target="_blank" rel="noopener">${escapeHtml(buttonText)}</a>
-    </div>
+    <li class="simple-list-item" data-stagger>
+      <h3><a href="${project.url}" target="_blank" rel="noopener">${escapeHtml(project.title)}</a></h3>
+      <p>${escapeHtml(project.description)}</p>
+      <p class="simple-meta">${escapeHtml(project.platforms.join(" / "))}</p>
+    </li>
   `;
 }
 
 function contactCard(contact) {
   const externalAttrs = contact.external ? ' target="_blank" rel="noopener"' : "";
   return `
-    <article class="contact-card" data-stagger>
+    <article class="contact-card simple-list-item" data-stagger>
       <h3>${escapeHtml(contact.title)}</h3>
       <a href="${contact.href}"${externalAttrs}>${escapeHtml(contact.label)}</a>
     </article>
-  `;
-}
-
-function itchProjectCard(project) {
-  return `
-    <a class="itch-card" href="${project.url}" target="_blank" rel="noopener" data-stagger>
-      <div class="itch-card-media">
-        <img src="${project.image}" alt="${escapeHtml(project.title)} cover art" loading="lazy">
-      </div>
-      <div class="itch-card-body">
-        <div class="itch-card-meta">
-          <span class="project-chip project-chip--itch">${escapeHtml(project.category)}</span>
-          <span class="project-chip">${escapeHtml(project.status)}</span>
-          <span class="project-chip">${escapeHtml(project.price)}</span>
-        </div>
-        <h3>${escapeHtml(project.title)}</h3>
-        <p>${escapeHtml(project.description)}</p>
-        <div class="itch-card-tags">
-          ${project.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}
-        </div>
-        <div class="itch-card-footer">
-          <span>${escapeHtml(project.platforms.join(" / "))}</span>
-          <span>Published ${escapeHtml(project.published)}</span>
-          <span>Open on itch.io</span>
-        </div>
-      </div>
-    </a>
   `;
 }
 
@@ -180,9 +145,9 @@ function renderLayout(content) {
           </a>
           <nav class="top-nav" aria-label="Primary">
             <a href="/" aria-current="page">Home</a>
-            <a href="/#what-i-do">What I Do</a>
-            <a href="/#releases">Releases</a>
-            <a href="/#open-source">Open Source</a>
+            <a href="/#skills">Skills</a>
+            <a href="/#released-projects">Released Projects</a>
+            <a href="/#open-source-projects">Open Source Projects</a>
             <a href="/#contacts">Contacts</a>
           </nav>
         </div>
@@ -207,40 +172,32 @@ function renderLayout(content) {
 function renderHomePage() {
   const allRepos = sortRepositories(getStarredRepositories(REPOSITORIES));
   return `
-    <section class="section" id="what-i-do">
+    <section class="section" id="skills">
       <div class="content-wrap">
-        ${sectionHeader("What I Do")}
-        <div class="single-panel">
-          <article class="oss-panel" data-stagger>
-            <ul class="contrib-list">
-              ${WHAT_I_DO.map(whatIDoItem).join("")}
-            </ul>
-          </article>
-        </div>
+        ${sectionHeader("Skills")}
+        <ul class="simple-list">
+          ${SKILLS.map(skillItem).join("")}
+        </ul>
       </div>
     </section>
 
-    <section class="section" id="releases">
+    <section class="section" id="released-projects">
       <div class="content-wrap">
-        ${sectionHeader("Releases")}
-        <div class="itch-intro" data-stagger>
-          ${summaryPanel("Itch", `${ITCH_PROJECTS.length} projects`, "button--itch", PROFILE.itch, "Visit Itch Profile")}
-        </div>
-        <div class="itch-grid">
-          ${ITCH_PROJECTS.map(itchProjectCard).join("")}
-        </div>
+        ${sectionHeader("Released Projects")}
+        <ul class="simple-list">
+          ${ITCH_PROJECTS.map(projectListItem).join("")}
+        </ul>
+        <p class="section-link" data-stagger><a href="${PROFILE.itch}" target="_blank" rel="noopener">View all on itch.io</a></p>
       </div>
     </section>
 
-    <section class="section" id="open-source">
+    <section class="section" id="open-source-projects">
       <div class="content-wrap">
-        ${sectionHeader("Open Source")}
-        <div class="repo-intro" data-stagger>
-          ${summaryPanel("GitHub", `${allRepos.length} repositories`, "", PROFILE.github, "Visit GitHub")}
-        </div>
-        <div class="repo-list" id="repo-list" aria-live="polite">
+        ${sectionHeader("Open Source Projects")}
+        <ul class="simple-list repo-list" id="repo-list" aria-live="polite">
           ${allRepos.map(repoListItem).join("")}
-        </div>
+        </ul>
+        <p class="section-link" data-stagger><a href="${PROFILE.github}" target="_blank" rel="noopener">View all on GitHub</a></p>
       </div>
     </section>
 
@@ -293,9 +250,9 @@ async function hydrateHomePage() {
     const allSorted = sortRepositories(visible);
     repoListEl.innerHTML = allSorted.length
       ? allSorted.map(repoListItem).join("")
-      : '<p class="repo-loading">No repositories found.</p>';
+      : '<li class="repo-loading">No repositories found.</li>';
   } catch {
-    repoListEl.innerHTML = `<p class="repo-loading">Repository list unavailable. Visit <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>.</p>`;
+    repoListEl.innerHTML = `<li class="repo-loading">Repository list unavailable. Visit <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>.</li>`;
   }
 }
 
