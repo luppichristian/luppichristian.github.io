@@ -13,25 +13,13 @@ const ITCH_PROJECTS = [
     title: "GFX Support View",
     url: "https://christian-luppi.itch.io/gfx-support-view",
     description: "Desktop utility for inspecting your system's graphics API support in one place.",
-    price: "$1.99",
-    category: "Tool",
-    status: "Released",
-    published: "Mar 2026",
     platforms: ["Windows", "macOS", "Linux"],
-    tags: ["Vulkan", "OpenGL", "DirectX", "Metal"],
-    image: "https://img.itch.zone/aW1nLzI2Mzk3ODY0LnBuZw==/315x250%23c/PIQY%2BL.png"
   },
   {
     title: "Win32 Input Tester",
     url: "https://christian-luppi.itch.io/win32-input-tester",
     description: "Native Windows utility for inspecting low-level keyboard, mouse, controller, tablet, raw input, HID, and clipboard data.",
-    price: "$2.99",
-    category: "Tool",
-    status: "Released",
-    published: "Mar 2026",
     platforms: ["Windows"],
-    tags: ["Win32", "Input", "HID", "Diagnostics"],
-    image: "https://img.itch.zone/aW1nLzI2MjcxOTM4LnBuZw==/315x250%23c/ThZr4R.png"
   }
 ];
 
@@ -43,16 +31,46 @@ const REPOSITORIES = [
 ];
 
 const SKILLS = [
-  "Core languages: C, C++, Python, JavaScript, SQL, HTML, and TypeScript.",
-  "Graphics programming: OpenGL, Vulkan, DirectX, SDL3 GPU, bgfx, modern GPU pipelines, and real-time rendering architecture.",
-  "Game programming: custom engine development and cross-platform work with SDL3, Raylib, and SFML.",
-  "Shader programming: fragment, vertex, and geometry shaders written in GLSL and HLSL.",
-  "Systems programming: low-level architecture, memory management, data structures, and cache-efficient design.",
-  "Performance engineering: SIMD optimization, CPU and GPU profiling, frame-time optimization, and data-oriented design.",
-  "Concurrency and parallelism: multithreaded programming, task-based systems, synchronization primitives, and high-performance runtime systems.",
-  "Tools and toolchains: RenderDoc, Tracy, CMake, Premake, Visual Studio, VS Code, Clang, GCC, MSVC, and GPU debugging workflows.",
-  "AI-assisted development: codegen pipelines, agent-assisted workflows, and productivity systems while keeping code quality standards.",
-  "Web and backend: full-stack web development, database design, and backend architecture."
+  {
+    label: "Core languages",
+    description: "C, C++, Python, JavaScript, SQL, HTML, and TypeScript."
+  },
+  {
+    label: "Graphics programming",
+    description: "OpenGL, Vulkan, DirectX, SDL3 GPU, bgfx, modern GPU pipelines, and real-time rendering architecture."
+  },
+  {
+    label: "Game programming",
+    description: "Custom engine development and cross-platform work with SDL3, Raylib, and SFML."
+  },
+  {
+    label: "Shader programming",
+    description: "Fragment, vertex, and geometry shaders written in GLSL and HLSL."
+  },
+  {
+    label: "Systems programming",
+    description: "Low-level architecture, memory management, data structures, and cache-efficient design."
+  },
+  {
+    label: "Performance engineering",
+    description: "SIMD optimization, CPU and GPU profiling, frame-time optimization, and data-oriented design."
+  },
+  {
+    label: "Concurrency and parallelism",
+    description: "Multithreaded programming, task-based systems, synchronization primitives, and high-performance runtime systems."
+  },
+  {
+    label: "Tools and toolchains",
+    description: "RenderDoc, Tracy, CMake, Premake, Visual Studio, VS Code, Clang, GCC, MSVC, and GPU debugging workflows."
+  },
+  {
+    label: "AI-assisted development",
+    description: "Codegen pipelines, agent-assisted workflows, and productivity systems while keeping code quality standards."
+  },
+  {
+    label: "Web and backend",
+    description: "Full-stack web development, database design, and backend architecture."
+  }
 ];
 
 const CONTACTS = [
@@ -61,6 +79,8 @@ const CONTACTS = [
   { title: "itch.io", label: "christian-luppi.itch.io", href: PROFILE.itch, external: true },
   { title: "YouTube", label: "youtube.com/@christianluppi", href: PROFILE.youtube, external: true }
 ];
+
+const BLOG_INDEX_PATH = "/blogs/index.json";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -97,8 +117,9 @@ function repoListItem(repo) {
 
 function skillItem(item) {
   return `
-    <li class="simple-list-item" data-stagger>
-      <p>${escapeHtml(item)}</p>
+    <li class="simple-list-item skill-item" data-stagger>
+      <p class="skill-label">${escapeHtml(item.label)}</p>
+      <p class="skill-description">${escapeHtml(item.description)}</p>
     </li>
   `;
 }
@@ -110,6 +131,16 @@ function sectionHeader(title) {
       <div class="section-line"></div>
     </div>
   `;
+}
+
+function formatDisplayDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
 }
 
 function projectListItem(project) {
@@ -132,6 +163,18 @@ function contactCard(contact) {
   `;
 }
 
+function blogListItem(post) {
+  const description = post.description || "Read the full article.";
+  const tags = Array.isArray(post.tags) ? post.tags.slice(0, 3).join(" / ") : "Blog";
+  return `
+    <li class="simple-list-item" data-stagger>
+      <h3><a href="${post.url}">${escapeHtml(post.title)}</a></h3>
+      <p>${escapeHtml(description)}</p>
+      <p class="simple-meta">${escapeHtml(formatDisplayDate(post.published))} · ${escapeHtml(tags)}</p>
+    </li>
+  `;
+}
+
 function renderLayout(content) {
   return `
     <div class="layout-shell">
@@ -144,11 +187,12 @@ function renderLayout(content) {
             christian luppi
           </a>
           <nav class="top-nav" aria-label="Primary">
-            <a href="/" aria-current="page">Home</a>
-            <a href="/#skills">Skills</a>
-            <a href="/#released-projects">Released Projects</a>
-            <a href="/#open-source-projects">Open Source Projects</a>
-            <a href="/#contacts">Contacts</a>
+            <a href="/" data-nav-link="home">Home</a>
+            <a href="/#skills" data-nav-link="skills">Skills</a>
+            <a href="/#blogs" data-nav-link="blogs">Blogs</a>
+            <a href="/#released-projects" data-nav-link="released-projects">Released Projects</a>
+            <a href="/#open-source-projects" data-nav-link="open-source-projects">Open Source Projects</a>
+            <a href="/#contacts" data-nav-link="contacts">Contacts</a>
           </nav>
         </div>
       </header>
@@ -191,13 +235,20 @@ function renderHomePage() {
       </div>
     </section>
 
-    <section class="section" id="open-source-projects">
+    <section class="section is-pending" id="open-source-projects" data-hydrate-section>
       <div class="content-wrap">
         ${sectionHeader("Open Source Projects")}
         <ul class="simple-list repo-list" id="repo-list" aria-live="polite">
           ${allRepos.map(repoListItem).join("")}
         </ul>
         <p class="section-link" data-stagger><a href="${PROFILE.github}" target="_blank" rel="noopener">View all on GitHub</a></p>
+      </div>
+    </section>
+
+    <section class="section is-pending" id="blogs" data-hydrate-section>
+      <div class="content-wrap">
+        ${sectionHeader("Blog")}
+        <ul class="simple-list" id="blog-list" aria-live="polite"></ul>
       </div>
     </section>
 
@@ -227,7 +278,7 @@ async function loadGsap() {
 
 async function runPageEntrance(root) {
   const gsap = await loadGsap();
-  const items = [...root.querySelectorAll("[data-stagger]")];
+  const items = Array.isArray(root) ? root : [...root.querySelectorAll("[data-stagger]")];
   if (!items.length) return;
   if (!gsap || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     items.forEach((item) => {
@@ -239,9 +290,19 @@ async function runPageEntrance(root) {
   gsap.fromTo(items, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.58, stagger: 0.08, ease: "power2.out" });
 }
 
+async function revealSection(section) {
+  if (!section || !section.classList.contains("is-pending")) return;
+  section.classList.remove("is-pending");
+  await runPageEntrance(section);
+  if (location.hash && section.matches(location.hash)) {
+    setTimeout(() => section.scrollIntoView({ behavior: "smooth", block: "start" }), 24);
+  }
+}
+
 async function hydrateHomePage() {
   const repoListEl = document.getElementById("repo-list");
   if (!repoListEl) return;
+  const section = repoListEl.closest("[data-hydrate-section]");
   try {
     const reposRes = await fetch("https://api.github.com/users/luppichristian/repos?per_page=100");
     if (!reposRes.ok) throw new Error("github failed");
@@ -254,21 +315,168 @@ async function hydrateHomePage() {
   } catch {
     repoListEl.innerHTML = `<li class="repo-loading">Repository list unavailable. Visit <a href="${PROFILE.github}" target="_blank" rel="noopener">GitHub</a>.</li>`;
   }
+  await revealSection(section);
+}
+
+async function hydrateBlogList() {
+  const blogListEl = document.getElementById("blog-list");
+  if (!blogListEl) return;
+  const section = blogListEl.closest("[data-hydrate-section]");
+  try {
+    const response = await fetch(BLOG_INDEX_PATH, { cache: "no-cache" });
+    if (!response.ok) throw new Error("blog index failed");
+    const posts = await response.json();
+    const visible = posts
+      .filter((post) => post && post.title && post.url)
+      .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0))
+      .slice(0, 6);
+    blogListEl.innerHTML = visible.length
+      ? visible.map(blogListItem).join("")
+      : '<li class="repo-loading">No blog posts published yet.</li>';
+  } catch {
+    blogListEl.innerHTML = '<li class="repo-loading">Blog list unavailable right now.</li>';
+  }
+  await revealSection(section);
+}
+
+function scrollToHashSection() {
+  if (!location.hash) return;
+  const section = document.querySelector(location.hash);
+  if (section && !section.classList.contains("is-pending")) {
+    setTimeout(() => section.scrollIntoView({ behavior: "smooth", block: "start" }), 24);
+  }
+}
+
+function setActiveNavLink(activeKey) {
+  const navLinks = document.querySelectorAll("[data-nav-link]");
+  navLinks.forEach((link) => {
+    if (link.dataset.navLink === activeKey) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function initHomeScrollSpy() {
+  const sectionKeys = ["skills", "released-projects", "open-source-projects", "blogs", "contacts"];
+  const sections = sectionKeys
+    .map((key) => document.getElementById(key))
+    .filter(Boolean);
+  if (!sections.length) {
+    setActiveNavLink("home");
+    return;
+  }
+
+  const updateActiveSection = () => {
+    const headerHeight = document.querySelector(".site-header")?.offsetHeight || 0;
+    const probeY = headerHeight + 24;
+    const activeSection = sections.find((section) => {
+      const rect = section.getBoundingClientRect();
+      return rect.top <= probeY && rect.bottom > probeY;
+    });
+
+    if (activeSection) {
+      setActiveNavLink(activeSection.id);
+      return;
+    }
+
+    const firstSectionTop = sections[0].getBoundingClientRect().top;
+    setActiveNavLink(firstSectionTop > probeY ? "home" : sections[sections.length - 1].id);
+  };
+
+  updateActiveSection();
+  window.addEventListener("scroll", updateActiveSection, { passive: true });
+  window.addEventListener("resize", updateActiveSection);
+  window.addEventListener("hashchange", updateActiveSection);
+}
+
+function initCursorShader() {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+  if (prefersReducedMotion || !hasFinePointer) return;
+
+  const root = document.documentElement;
+  const updateCursor = (x, y) => {
+    root.style.setProperty("--cursor-x", `${x}px`);
+    root.style.setProperty("--cursor-y", `${y}px`);
+  };
+
+  updateCursor(window.innerWidth * 0.5, window.innerHeight * 0.3);
+
+  window.addEventListener("pointermove", (event) => {
+    updateCursor(event.clientX, event.clientY);
+  }, { passive: true });
+
+  window.addEventListener("pointerdown", () => {
+    document.body.classList.add("is-pointer-active");
+  });
+
+  const clearPointerActive = () => {
+    document.body.classList.remove("is-pointer-active");
+  };
+
+  window.addEventListener("pointerup", clearPointerActive);
+  window.addEventListener("pointercancel", clearPointerActive);
+  window.addEventListener("blur", clearPointerActive);
+}
+
+function initPressAnimations() {
+  const interactiveSelector = ".simple-list-item, .section-head, .top-nav a, .brand, .footer-links a, .section-link a, .contact-card a";
+  let pressedElement = null;
+
+  const clearPressedState = () => {
+    if (!pressedElement) return;
+    pressedElement.classList.remove("is-pressed");
+    pressedElement = null;
+  };
+
+  document.addEventListener("pointerdown", (event) => {
+    const nextPressedElement = event.target.closest(interactiveSelector);
+    if (!nextPressedElement) return;
+    clearPressedState();
+    pressedElement = nextPressedElement;
+    pressedElement.classList.add("is-pressed");
+  });
+
+  window.addEventListener("pointerup", clearPressedState);
+  window.addEventListener("pointercancel", clearPressedState);
+  window.addEventListener("blur", clearPressedState);
+
+  document.addEventListener("pointermove", (event) => {
+    const card = event.target.closest(".simple-list-item, .blog-prose");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--spot-x", `${event.clientX - rect.left}px`);
+    card.style.setProperty("--spot-y", `${event.clientY - rect.top}px`);
+  }, { passive: true });
+}
+
+async function initStaticPage() {
+  initCursorShader();
+  initPressAnimations();
+  const items = [...document.querySelectorAll("[data-stagger]")];
+  if (items.length) {
+    await runPageEntrance(items);
+  }
 }
 
 async function init() {
   const app = document.getElementById("app");
-  if (!app) return;
-  app.innerHTML = renderLayout(renderHomePage());
-  document.getElementById("app-main")?.focus({ preventScroll: true });
-  await runPageEntrance(app);
-  hydrateHomePage();
-  if (location.hash) {
-    const section = document.querySelector(location.hash);
-    if (section) {
-      setTimeout(() => section.scrollIntoView({ behavior: "smooth", block: "start" }), 24);
-    }
+  if (!app) {
+    await initStaticPage();
+    return;
   }
+  app.innerHTML = renderLayout(renderHomePage());
+  initCursorShader();
+  initPressAnimations();
+  initHomeScrollSpy();
+  document.getElementById("app-main")?.focus({ preventScroll: true });
+  const initialItems = [...app.querySelectorAll("[data-stagger]")].filter((item) => !item.closest("[data-hydrate-section]"));
+  await runPageEntrance(initialItems);
+  scrollToHashSection();
+  hydrateBlogList();
+  hydrateHomePage();
 }
 
 init();

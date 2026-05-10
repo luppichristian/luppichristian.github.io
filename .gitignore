@@ -1,0 +1,5 @@
+.ruff_cache/
+blogs/index.json
+blogs/*/
+!blogs/posts/
+!blogs/posts/**/*.md
